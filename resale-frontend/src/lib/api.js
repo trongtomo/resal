@@ -1,18 +1,26 @@
+import qs from 'qs'
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:1337'
 
-export function getApiUrl(path) {
-  return `${API_BASE_URL}${path}`
+export function getApiUrl(path, query = {}) {
+  const queryString = qs.stringify(query, { 
+    encodeValuesOnly: false,
+    addQueryPrefix: false
+  })
+  const url = `${API_BASE_URL}${path}`
+  return queryString ? `${url}?${queryString}` : url
 }
 
 export async function fetchFromApi(path, options = {}) {
-  const url = getApiUrl(path)
+  const { query, ...fetchOptions } = options
+  const url = getApiUrl(path, query)
   
   const response = await fetch(url, {
     cache: 'no-store',
-    ...options,
+    ...fetchOptions,
     headers: {
       'Content-Type': 'application/json',
-      ...options.headers,
+      ...fetchOptions.headers,
     },
   })
 

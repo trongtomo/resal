@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import ProductsDropdown from './ProductsDropdown'
 
 export default function Header() {
   return (
@@ -18,17 +19,18 @@ export default function Header() {
             >
               Home
             </Link>
-            <Link 
-              href="/tags" 
-              className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-            >
-              Tags
-            </Link>
+            <ProductsDropdown />
             <Link 
               href="/blog" 
               className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors"
             >
               Blog
+            </Link>
+            <Link 
+              href="/tags" 
+              className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+            >
+              Tags
             </Link>
           </nav>
 

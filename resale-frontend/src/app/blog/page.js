@@ -1,3 +1,4 @@
+import MarkdownRenderer from '@/components/MarkdownRenderer'
 import Pagination from '@/components/Pagination'
 import { getArticles } from '@/services/articles'
 import { formatDate, truncateText } from '@/utils/format'
@@ -11,7 +12,8 @@ export const metadata = {
 }
 
 export default async function BlogPage({ searchParams }) {
-  const page = parseInt(searchParams?.page || '1')
+  const resolvedSearchParams = await searchParams
+  const page = parseInt(resolvedSearchParams?.page || '1')
   const pageSize = 9
 
   let articles = []
@@ -61,22 +63,49 @@ export default async function BlogPage({ searchParams }) {
                       className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow group"
                     >
                       <div className="aspect-video bg-gray-100 flex items-center justify-center">
-                        <div className="text-gray-400 text-center">
-                          <svg className="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                          </svg>
-                          <p className="text-sm">No image</p>
-                        </div>
+                        {article.cover?.url ? (
+                          <img
+                            src={`${process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337'}${article.cover.url}`}
+                            alt={article.cover.alternativeText || article.title}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="text-gray-400 text-center">
+                            <svg className="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <p className="text-sm">No image</p>
+                          </div>
+                        )}
                       </div>
                       <div className="p-6">
                         <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
                           {article.title}
                         </h3>
-                        <p className="text-gray-600 text-sm mb-3">
-                          {truncateText(article.description, 120)}
-                        </p>
-                        <div className="text-xs text-gray-500">
-                          <p>Published: {formatDate(article.publishedAt)}</p>
+                        <div className="text-gray-600 text-sm mb-3">
+                          {article.description ? (
+                            <p>{truncateText(article.description, 120)}</p>
+                          ) : article.blocks?.find(block => block.__component === 'shared.rich-text') ? (
+                            <div className="prose prose-sm max-w-none">
+                              <MarkdownRenderer 
+                                content={truncateText(
+                                  article.blocks.find(block => block.__component === 'shared.rich-text')?.body?.replace(/[#*]/g, '') || '', 
+                                  120
+                                )} 
+                              />
+                            </div>
+                          ) : null}
+                        </div>
+                        <div className="flex items-center justify-between text-xs text-gray-500">
+                          <div>
+                            <p>Published: {formatDate(article.publishedAt)}</p>
+                            {article.author && <p>By: {typeof article.author === 'string' ? article.author : article.author.name || article.author.email || 'Unknown'}</p>}
+                          </div>
+                          {article.category && (
+                            <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                              {typeof article.category === 'string' ? article.category : article.category.name || article.category.title || 'Category'}
+                            </span>
+                          )}
                         </div>
                       </div>
                     </Link>

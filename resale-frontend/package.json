@@ -10,9 +10,11 @@
   },
   "dependencies": {
     "next": "15.5.2",
+    "qs": "^6.13.1",
     "react": "^18",
     "react-dom": "^18",
-    "qs": "^6.13.1"
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
     "@types/node": "^20",

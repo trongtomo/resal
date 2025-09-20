@@ -6,14 +6,17 @@ import Link from 'next/link'
 export const dynamic = 'force-dynamic'
 
 export async function generateMetadata({ params }) {
+  const { slug } = await params
   return {
-    title: `Tag: ${params.slug}`,
-    description: `Articles tagged with ${params.slug}`
+    title: `Tag: ${slug}`,
+    description: `Articles tagged with ${slug}`
   }
 }
 
 export default async function TagArticlesPage({ params, searchParams }) {
-  const page = parseInt(searchParams?.page || '1')
+  const { slug } = await params
+  const resolvedSearchParams = await searchParams
+  const page = parseInt(resolvedSearchParams?.page || '1')
   const pageSize = 9
 
   let articles = []
@@ -21,7 +24,7 @@ export default async function TagArticlesPage({ params, searchParams }) {
   let error = null
 
   try {
-    const data = await getArticlesByTag(params.slug, page, pageSize)
+    const data = await getArticlesByTag(slug, page, pageSize)
     articles = data.data || []
     pagination = data.meta?.pagination || { page: 1, pageCount: 1, total: 0 }
   } catch (err) {
@@ -34,8 +37,8 @@ export default async function TagArticlesPage({ params, searchParams }) {
       <div className="bg-gray-50 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">Tag: {params.slug}</h1>
-            <p className="text-lg text-gray-600">Articles tagged with {params.slug}</p>
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">Tag: {slug}</h1>
+            <p className="text-lg text-gray-600">Articles tagged with {slug}</p>
           </div>
         </div>
       </div>

@@ -1,19 +1,26 @@
+import MarkdownRenderer from '@/components/MarkdownRenderer'
+import { getFeaturedProducts } from '@/services/products'
 import { getTags } from '@/services/tags'
-import { formatDate } from '@/utils/format'
+import { formatCurrency, formatDate, truncateText } from '@/utils/format'
 import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
 
 export default async function Home() {
   let tags = []
+  let products = []
   let error = null
 
   try {
-    const data = await getTags()
-    tags = data.data || []
+    const [tagsData, productsData] = await Promise.all([
+      getTags(),
+      getFeaturedProducts(6)
+    ])
+    tags = tagsData.data || []
+    products = productsData.data || []
   } catch (err) {
     error = err.message
-    console.error('Failed to fetch tags:', err)
+    console.error('Failed to fetch data:', err)
   }
 
   return (
@@ -30,10 +37,10 @@ export default async function Home() {
             </p>
             <div className="space-x-4">
               <Link 
-                href="/tags" 
+                href="/products" 
                 className="inline-block bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
               >
-                Browse Tags
+                Shop Products
               </Link>
               <Link 
                 href="/blog" 
@@ -85,6 +92,80 @@ export default async function Home() {
               <p className="text-gray-600">Well-structured codebase with modern development practices</p>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Featured Products Section */}
+      <section className="py-16 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Featured Products</h2>
+            <p className="text-lg text-gray-600">Discover our premium collection</p>
+          </div>
+          
+          {error ? (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+              <p className="text-red-600">Unable to load products: {error}</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {products.slice(0, 6).map((product) => (
+                <Link 
+                  key={product.id} 
+                  href={`/products/${product.slug}`}
+                  className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow group"
+                >
+                  <div className="aspect-square bg-gray-100 flex items-center justify-center">
+                    <div className="text-gray-400 text-center">
+                      <svg className="w-16 h-16 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                      </svg>
+                      <p className="text-sm">No image</p>
+                    </div>
+                  </div>
+                  <div className="p-6">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                      {product.name}
+                    </h3>
+                    <div className="text-gray-600 text-sm mb-3">
+                      {product.shortDescription ? (
+                        <p>{truncateText(product.shortDescription, 80)}</p>
+                      ) : product.description ? (
+                        <div className="prose prose-sm max-w-none">
+                          <MarkdownRenderer 
+                            content={truncateText(product.description.replace(/[#*]/g, ''), 80)} 
+                          />
+                        </div>
+                      ) : null}
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-2xl font-bold text-gray-900">
+                        {formatCurrency(product.price)}
+                      </span>
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        product.product_status === 'active' 
+                          ? 'bg-green-100 text-green-800' 
+                          : 'bg-red-100 text-red-800'
+                      }`}>
+                        {product.product_status}
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+          
+          {products.length > 6 && (
+            <div className="text-center mt-8">
+              <Link 
+                href="/products" 
+                className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+              >
+                View All Products
+              </Link>
+            </div>
+          )}
         </div>
       </section>
 

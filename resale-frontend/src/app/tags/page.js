@@ -27,7 +27,7 @@ export default async function TagsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-4xl font-bold text-gray-900 mb-4">Tags</h1>
-            <p className="text-lg text-gray-600">Browse all available content categories</p>
+            <p className="text-lg text-gray-600">Browse all available content articles</p>
           </div>
         </div>
       </div>
@@ -44,7 +44,7 @@ export default async function TagsPage() {
                 Found {tags.length} tag{tags.length !== 1 ? 's' : ''}
               </p>
             </div>
-            
+
             {tags.length > 0 ? (
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {tags.map((tag) => (

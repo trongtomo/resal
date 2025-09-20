@@ -1,0 +1,14 @@
+{
+  "kind": "singleType",
+  "collectionName": "dropdowns",
+  "info": {
+    "singularName": "dropdown",
+    "pluralName": "dropdowns",
+    "displayName": "Dropdown"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {}
+}
