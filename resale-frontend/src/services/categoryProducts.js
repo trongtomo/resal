@@ -20,7 +20,9 @@ export async function getCategoriesWithTags() {
 // Get just categories (for direct links)
 export async function getCategoryProducts() {
   try {
-    const data = await fetchFromApi('/api/category-products')
+    const data = await fetchFromApi('/api/category-products', {
+      revalidate: 3600 // 1 hour for categories (rarely change)
+    })
     return data
   } catch (error) {
     console.error('Error fetching product categories:', error)

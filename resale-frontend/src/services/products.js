@@ -45,7 +45,11 @@ export async function getProducts(page = 1, pageSize = 12, filters = {}) {
       }
     }
 
-    const data = await fetchFromApi('/api/products', { query })
+    // Cache strategy: 30 minutes for product listings
+    const data = await fetchFromApi('/api/products', { 
+      query,
+      revalidate: 1800 // 30 minutes
+    })
     return data
   } catch (error) {
     console.error('Error fetching products:', error)
@@ -58,7 +62,8 @@ export async function getProductBySlug(slug) {
     const data = await fetchFromApi('/api/products', {
       query: {
         filters: { slug: { $eq: slug } }
-      }
+      },
+      revalidate: 3600 // 1 hour for individual products
     })
     return data
   } catch (error) {
@@ -73,7 +78,8 @@ export async function getProductsByTag(tagSlug, page = 1, pageSize = 12) {
       query: {
         filters: { tags: { slug: { $eq: tagSlug } } },
         pagination: { page, pageSize }
-      }
+      },
+      revalidate: 1800 // 30 minutes for tag-based listings
     })
     return data
   } catch (error) {
@@ -87,7 +93,8 @@ export async function getFeaturedProducts(limit = 6) {
     const data = await fetchFromApi('/api/products', {
       query: {
         pagination: { page: 1, pageSize: limit }
-      }
+      },
+      revalidate: 1800 // 30 minutes for featured products
     })
     return data
   } catch (error) {

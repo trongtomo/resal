@@ -11,8 +11,17 @@ export function formatDate(date, options = {}) {
   return new Intl.DateTimeFormat('en-US', defaultOptions).format(new Date(date))
 }
 
-export function formatCurrency(amount, currency = 'USD', locale = 'en-US') {
+export function formatCurrency(amount, currency = 'VND', locale = 'vi-VN') {
   if (amount === null || amount === undefined || isNaN(amount)) return ''
+  
+  if (currency === 'VND') {
+    // Vietnamese Dong formatting: 1.500.000 vnđ
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'decimal',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount) + ' vnđ'
+  }
   
   return new Intl.NumberFormat(locale, {
     style: 'currency',

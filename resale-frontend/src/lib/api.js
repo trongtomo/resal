@@ -12,11 +12,12 @@ export function getApiUrl(path, query = {}) {
 }
 
 export async function fetchFromApi(path, options = {}) {
-  const { query, ...fetchOptions } = options
+  const { query, cache = 'force-cache', revalidate = 3600, ...fetchOptions } = options
   const url = getApiUrl(path, query)
   
   const response = await fetch(url, {
-    cache: 'no-store',
+    cache,
+    next: { revalidate },
     ...fetchOptions,
     headers: {
       'Content-Type': 'application/json',

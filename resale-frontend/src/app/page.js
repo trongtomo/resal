@@ -4,7 +4,7 @@ import { getTags } from '@/services/tags'
 import { formatCurrency, formatDate, truncateText } from '@/utils/format'
 import Link from 'next/link'
 
-export const dynamic = 'force-dynamic'
+// Allow caching for better performance
 
 export default async function Home() {
   let tags = []
@@ -174,7 +174,7 @@ export default async function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Available Tags</h2>
-            <p className="text-lg text-gray-600">Explore our content categories</p>
+            <p className="text-lg text-gray-600">Explore our articles</p>
           </div>
           
           {error ? (

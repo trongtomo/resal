@@ -4,7 +4,7 @@ import { getProducts } from '@/services/products'
 import { formatCurrency, truncateText } from '@/utils/format'
 import Link from 'next/link'
 
-export const dynamic = 'force-dynamic'
+// Allow caching for better performance
 
 export const metadata = {
   title: 'Products',

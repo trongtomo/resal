@@ -2,7 +2,7 @@ import { getTags } from '@/services/tags'
 import { formatDate } from '@/utils/format'
 import Link from 'next/link'
 
-export const dynamic = 'force-dynamic'
+// Allow caching for better performance
 
 export const metadata = {
   title: 'Tags',
