@@ -45,10 +45,12 @@ export async function getProducts(page = 1, pageSize = 12, filters = {}) {
       }
     }
 
-    // Cache strategy: 30 minutes for product listings
+    // Cache strategy: 30 minutes for product listings, unless noCache is specified
     const data = await fetchFromApi('/api/products', { 
       query,
-      revalidate: 1800 // 30 minutes
+      cache: filters.noCache ? 'no-store' : 'force-cache',
+      revalidate: filters.noCache ? 0 : 1800, // 30 minutes
+      headers: filters.noCache ? { 'Cache-Control': 'no-cache' } : {}
     })
     return data
   } catch (error) {

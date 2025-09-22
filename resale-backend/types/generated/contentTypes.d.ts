@@ -534,10 +534,6 @@ export interface ApiCategoryProductCategoryProduct
     > &
       Schema.Attribute.Private;
     name: Schema.Attribute.String;
-    parent: Schema.Attribute.Relation<
-      'oneToMany',
-      'api::category-product.category-product'
-    >;
     product: Schema.Attribute.Relation<'manyToOne', 'api::product.product'>;
     publishedAt: Schema.Attribute.DateTime;
     SEO: Schema.Attribute.Component<'shared.seo', true>;

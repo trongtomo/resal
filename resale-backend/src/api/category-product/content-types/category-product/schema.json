@@ -24,14 +24,7 @@
     "category_product": {
       "type": "relation",
       "relation": "manyToOne",
-      "target": "api::category-product.category-product",
-      "inversedBy": "parent"
-    },
-    "parent": {
-      "type": "relation",
-      "relation": "oneToMany",
-      "target": "api::category-product.category-product",
-      "mappedBy": "category_product"
+      "target": "api::category-product.category-product"
     },
     "product": {
       "type": "relation",

@@ -2,6 +2,7 @@ import Footer from '@/components/Footer'
 import Header from '@/components/Header'
 import LoadingBar from '@/components/LoadingBar'
 import ScrollToTop from '@/components/ScrollToTop'
+import '@/lib/loadingBar'; // Initialize loading bar
 import '@/styles/nprogress.css'
 import './globals.css'
 

@@ -23,12 +23,20 @@ export async function getCategoryProducts(options = {}) {
     const query = {}
     
     if (options.populate) {
-      query.populate = options.populate
+      // Handle Strapi v4 populate syntax
+      if (options.populate.includes(',')) {
+        const relations = options.populate.split(',')
+        relations.forEach(relation => {
+          query[`populate[${relation}]`] = true
+        })
+      } else {
+        query[`populate[${options.populate}]`] = true
+      }
     }
     
     const data = await fetchFromApi('/api/category-products', {
       query,
-      revalidate: 3600 // 1 hour for categories (rarely change)
+      revalidate: 60 // 1 minute cache - good balance
     })
     return data
   } catch (error) {
