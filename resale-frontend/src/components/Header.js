@@ -1,7 +1,19 @@
+'use client'
+
 import Link from 'next/link'
-import ProductsDropdown from './ProductsDropdown'
+import { useState } from 'react'
+import CategoryDropdown from './CategoryDropdown'
 
 export default function Header() {
+  const [activeDropdown, setActiveDropdown] = useState(null)
+
+  const handleDropdownToggle = (dropdownName) => {
+    setActiveDropdown(activeDropdown === dropdownName ? null : dropdownName)
+  }
+
+  const handleDropdownClose = () => {
+    setActiveDropdown(null)
+  }
   return (
     <header className="bg-white shadow-sm border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -19,7 +31,27 @@ export default function Header() {
             >
               Home
             </Link>
-            <ProductsDropdown />
+            <CategoryDropdown 
+              category="clothing" 
+              label="Clothing" 
+              isActive={activeDropdown === 'clothing'}
+              onToggle={() => handleDropdownToggle('clothing')}
+              onClose={handleDropdownClose}
+            />
+            <CategoryDropdown 
+              category="food" 
+              label="Food" 
+              isActive={activeDropdown === 'food'}
+              onToggle={() => handleDropdownToggle('food')}
+              onClose={handleDropdownClose}
+            />
+            <CategoryDropdown 
+              category="beauty" 
+              label="Beauty" 
+              isActive={activeDropdown === 'beauty'}
+              onToggle={() => handleDropdownToggle('beauty')}
+              onClose={handleDropdownClose}
+            />
             <Link 
               href="/blog" 
               className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors"

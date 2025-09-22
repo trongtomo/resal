@@ -18,9 +18,16 @@ export async function getCategoriesWithTags() {
 }
 
 // Get just categories (for direct links)
-export async function getCategoryProducts() {
+export async function getCategoryProducts(options = {}) {
   try {
+    const query = {}
+    
+    if (options.populate) {
+      query.populate = options.populate
+    }
+    
     const data = await fetchFromApi('/api/category-products', {
+      query,
       revalidate: 3600 // 1 hour for categories (rarely change)
     })
     return data
