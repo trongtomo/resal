@@ -9,72 +9,65 @@
   "options": {
     "draftAndPublish": true
   },
-  "pluginOptions": {
-    "i18n": {
-      "localized": false
-    }
-  },
+  "pluginOptions": {},
   "attributes": {
     "name": {
-      "type": "string"
+      "type": "string",
+      "required": true
     },
     "slug": {
       "type": "uid",
-      "targetField": "name"
+      "targetField": "name",
+      "required": true
     },
     "price": {
-      "type": "integer"
+      "type": "integer",
+      "required": true
     },
     "description": {
       "type": "richtext"
     },
-    "discount_price": {
+    "shortDescription": {
+      "type": "text"
+    },
+    "discountPrice": {
       "type": "integer"
     },
-    "stock_quantity": {
-      "type": "integer"
+    "stockQuantity": {
+      "type": "integer",
+      "default": 0
     },
-    "image": {
+    "images": {
       "type": "media",
       "multiple": true,
       "allowedTypes": [
-        "images",
-        "files",
-        "videos",
-        "audios"
+        "images"
       ]
     },
-    "product_status": {
+    "status": {
       "type": "enumeration",
       "enum": [
         "active",
         "inactive",
         "draft"
-      ]
+      ],
+      "default": "active"
     },
-    "tags": {
-      "type": "relation",
-      "relation": "manyToMany",
-      "target": "api::tag.tag",
-      "mappedBy": "products"
-    },
-    "category_products": {
-      "type": "relation",
-      "relation": "oneToMany",
-      "target": "api::category-product.category-product",
-      "mappedBy": "product"
-    },
-    "shortDescription": {
-      "type": "string"
-    },
-    "SEO": {
-      "type": "component",
-      "component": "shared.seo",
-      "repeatable": true
-    },
-    "SKU": {
+    "sku": {
       "type": "string",
       "unique": true
+    },
+    "category": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::category.category",
+      "inversedBy": "products"
+    },
+    "brand": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::brand.brand",
+      "inversedBy": "products"
     }
   }
 }

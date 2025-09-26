@@ -1,23 +1,27 @@
 'use client'
 
-import { getCategoryProducts } from '@/services/categoryProducts'
+import { api } from '@/lib/simple-api'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import Cart from './Cart'
+import CartIcon from './CartIcon'
 import CategoryDropdown from './CategoryDropdown'
+import MobileNavigation from './MobileNavigation'
+import SearchBar from './SearchBar'
 
 export default function Header() {
   const [activeDropdown, setActiveDropdown] = useState(null)
   const [categories, setCategories] = useState([])
   const [loading, setLoading] = useState(true)
+  const [isCartOpen, setIsCartOpen] = useState(false)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const data = await getCategoryProducts({ populate: 'category_product' })
-        // Filter to get only parent categories (those without a parent category_product) and published
-        const parentCategories = data.data?.filter(category => 
-          category.publishedAt && !category.category_product
-        ) || []
+        // Get all categories and filter for parent categories (those with children)
+        const data = await api.getAllCategories()
+        const parentCategories = data.categories?.filter(cat => cat.children && cat.children.length > 0) || []
         setCategories(parentCategories)
       } catch (error) {
         console.error('Error fetching categories:', error)
@@ -36,6 +40,14 @@ export default function Header() {
   const handleDropdownClose = () => {
     setActiveDropdown(null)
   }
+
+  const handleCartToggle = () => {
+    setIsCartOpen(!isCartOpen)
+  }
+
+  const handleMobileMenuToggle = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen)
+  }
   return (
     <header className="bg-white shadow-sm border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -44,6 +56,11 @@ export default function Header() {
             <Link href="/" className="text-2xl font-bold text-gray-900">
               Resale
             </Link>
+          </div>
+
+          {/* Search Bar - Desktop */}
+          <div className="hidden md:flex flex-1 max-w-lg mx-8">
+            <SearchBar placeholder="Search products..." />
           </div>
           
           <nav className="hidden md:flex space-x-8">
@@ -59,7 +76,7 @@ export default function Header() {
               categories.map((category) => (
                 <CategoryDropdown 
                   key={category.slug}
-                  category={category.slug} 
+                  category={category} 
                   label={category.name} 
                   isActive={activeDropdown === category.slug}
                   onToggle={() => handleDropdownToggle(category.slug)}
@@ -81,15 +98,34 @@ export default function Header() {
             </Link>
           </nav>
 
-          <div className="md:hidden">
-            <button className="text-gray-700 hover:text-gray-900 focus:outline-none focus:text-gray-900">
-              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" suppressHydrationWarning>
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
+          {/* Cart and Mobile Menu */}
+          <div className="flex items-center space-x-4">
+            <CartIcon onClick={handleCartToggle} />
+            
+            <div className="md:hidden">
+              <button 
+                onClick={handleMobileMenuToggle}
+                className="text-gray-700 hover:text-gray-900 focus:outline-none focus:text-gray-900"
+              >
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" suppressHydrationWarning>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Mobile Search Bar */}
+      <div className="md:hidden border-t bg-gray-50 px-4 py-3">
+        <SearchBar placeholder="Search products..." />
+      </div>
+
+      {/* Cart Sidebar */}
+      <Cart isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+      
+      {/* Mobile Navigation */}
+      <MobileNavigation isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
     </header>
   )
 }

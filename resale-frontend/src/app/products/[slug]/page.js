@@ -1,5 +1,6 @@
+import AddToCartButton from '@/components/AddToCartButton'
 import MarkdownRenderer from '@/components/MarkdownRenderer'
-import { getProductBySlug } from '@/services/products'
+import { api } from '@/lib/simple-api'
 import { formatCurrency, formatDate } from '@/utils/format'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -10,8 +11,8 @@ export async function generateMetadata({ params }) {
   const { slug } = await params
   
   try {
-    const data = await getProductBySlug(slug)
-    const product = data.data?.[0]
+    const data = await api.getProduct(slug)
+    const product = data.products?.[0]
     
     if (!product) {
       return {
@@ -38,8 +39,8 @@ export default async function ProductPage({ params }) {
   let error = null
 
   try {
-    const data = await getProductBySlug(slug)
-    product = data.data?.[0]
+    const data = await api.getProduct(slug)
+    product = data.products?.[0]
     
     if (!product) {
       notFound()
@@ -125,9 +126,7 @@ export default async function ProductPage({ params }) {
 
             {/* Product Actions */}
             <div className="space-y-4">
-              <button className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
-                Add to Cart
-              </button>
+              <AddToCartButton product={product} />
               <button className="w-full border border-gray-300 text-gray-700 py-3 px-6 rounded-lg font-semibold hover:bg-gray-50 transition-colors">
                 Add to Wishlist
               </button>

@@ -1,23 +1,23 @@
+import AddToCartButton from '@/components/AddToCartButton'
 import MarkdownRenderer from '@/components/MarkdownRenderer'
-import { getFeaturedProducts } from '@/services/products'
-import { getTags } from '@/services/tags'
+import { api } from '@/lib/simple-api'
 import { formatCurrency, formatDate, truncateText } from '@/utils/format'
 import Link from 'next/link'
 
 // Allow caching for better performance
 
 export default async function Home() {
-  let tags = []
+  let categories = []
   let products = []
   let error = null
 
   try {
-    const [tagsData, productsData] = await Promise.all([
-      getTags(),
-      getFeaturedProducts(6)
+    const [categoriesData, productsData] = await Promise.all([
+      api.getMainCategories(),
+      api.getAllProducts()
     ])
-    tags = tagsData.data || []
-    products = productsData.data || []
+    categories = categoriesData.categories || []
+    products = (productsData.products || []).slice(0, 6) // Get first 6 products as featured
   } catch (err) {
     error = err.message
     console.error('Failed to fetch data:', err)
@@ -111,7 +111,7 @@ export default async function Home() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {products.slice(0, 6).map((product) => (
                 <Link 
-                  key={product.id} 
+                  key={product.documentId} 
                   href={`/products/${product.slug}`}
                   className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow group"
                 >
@@ -138,18 +138,19 @@ export default async function Home() {
                         </div>
                       ) : null}
                     </div>
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between mb-4">
                       <span className="text-2xl font-bold text-gray-900">
                         {formatCurrency(product.price)}
                       </span>
                       <span className={`px-2 py-1 text-xs rounded-full ${
-                        product.product_status === 'active' 
+                        product.status === 'active' 
                           ? 'bg-green-100 text-green-800' 
                           : 'bg-red-100 text-red-800'
                       }`}>
-                        {product.product_status}
+                        {product.status}
                       </span>
                     </div>
+                    <AddToCartButton product={product} className="w-full" />
                   </div>
                 </Link>
               ))}
@@ -169,44 +170,44 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Tags Preview Section */}
+      {/* Categories Preview Section */}
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Available Tags</h2>
-            <p className="text-lg text-gray-600">Explore our articles</p>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Shop by Category</h2>
+            <p className="text-lg text-gray-600">Explore our product categories</p>
           </div>
           
           {error ? (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
-              <p className="text-red-600">Unable to load tags: {error}</p>
+              <p className="text-red-600">Unable to load categories: {error}</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {tags.slice(0, 6).map((tag) => (
+              {categories.slice(0, 6).map((category) => (
                 <Link 
-                  key={tag.id} 
-                  href={`/tags/${tag.slug}`}
+                  key={category.documentId} 
+                  href={`/products?category=${category.slug}`}
                   className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
                 >
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">{tag.name}</h3>
-                  <p className="text-gray-600 text-sm mb-3">Slug: {tag.slug}</p>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">{category.name}</h3>
+                  <p className="text-gray-600 text-sm mb-3">{category.description || 'No description'}</p>
                   <div className="text-xs text-gray-500">
-                    <p>Created: {formatDate(tag.createdAt)}</p>
-                    <p>Published: {formatDate(tag.publishedAt)}</p>
+                    <p>Created: {formatDate(category.createdAt)}</p>
+                    <p>Published: {formatDate(category.publishedAt)}</p>
                   </div>
                 </Link>
               ))}
             </div>
           )}
           
-          {tags.length > 6 && (
+          {categories.length > 6 && (
             <div className="text-center mt-8">
               <Link 
-                href="/tags" 
+                href="/products" 
                 className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
               >
-                View All Tags
+                View All Categories
               </Link>
             </div>
           )}

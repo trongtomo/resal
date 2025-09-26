@@ -1,0 +1,138 @@
+const fs = require('fs');
+const path = require('path');
+
+/**
+ * Migration script to create sample data with the new simple schema
+ * This will create the hierarchical structure: Shoes -> Running/Sneaker/Casual
+ */
+
+const sampleData = {
+  categories: [
+    {
+      name: "Shoes",
+      slug: "shoes",
+      description: "All types of footwear",
+      isMainCategory: true,
+      parent: null
+    },
+    {
+      name: "Running",
+      slug: "running",
+      description: "Running and athletic shoes",
+      isMainCategory: false,
+      parent: "shoes"
+    },
+    {
+      name: "Sneaker",
+      slug: "sneaker", 
+      description: "Casual sneakers and lifestyle shoes",
+      isMainCategory: false,
+      parent: "shoes"
+    },
+    {
+      name: "Casual",
+      slug: "casual",
+      description: "Everyday casual footwear",
+      isMainCategory: false,
+      parent: "shoes"
+    }
+  ],
+  brands: [
+    {
+      name: "Nike",
+      slug: "nike",
+      description: "Just Do It"
+    },
+    {
+      name: "Adidas", 
+      slug: "adidas",
+      description: "Impossible is Nothing"
+    },
+    {
+      name: "Converse",
+      slug: "converse", 
+      description: "All Star"
+    },
+    {
+      name: "Vans",
+      slug: "vans",
+      description: "Off The Wall"
+    }
+  ],
+  products: [
+    {
+      name: "Nike Air Max 270",
+      slug: "nike-air-max-270",
+      price: 12000,
+      shortDescription: "Comfortable running shoes with Max Air cushioning",
+      description: "The Nike Air Max 270 delivers visible cushioning under every step. The design draws inspiration from Air Max icons, showcasing Nike's greatest innovation with its large window and fresh array of colors.",
+      sku: "NIKE-AM270-001",
+      status: "active",
+      stockQuantity: 50,
+      category: "running",
+      brand: "nike"
+    },
+    {
+      name: "Adidas Ultraboost 22",
+      slug: "adidas-ultraboost-22", 
+      price: 18000,
+      shortDescription: "Premium running shoes with Boost technology",
+      description: "The Adidas Ultraboost 22 features our most responsive Boost midsole yet. The Primeknit+ upper adapts to your foot for a sock-like fit.",
+      sku: "ADIDAS-UB22-001",
+      status: "active", 
+      stockQuantity: 30,
+      category: "running",
+      brand: "adidas"
+    },
+    {
+      name: "Nike Air Force 1",
+      slug: "nike-air-force-1",
+      price: 9000,
+      shortDescription: "Classic basketball-inspired sneaker",
+      description: "The radiance lives on in the Nike Air Force 1 '07, the basketball original that puts a fresh spin on what you know best.",
+      sku: "NIKE-AF1-001", 
+      status: "active",
+      stockQuantity: 75,
+      category: "sneaker",
+      brand: "nike"
+    },
+    {
+      name: "Converse Chuck Taylor All Star",
+      slug: "converse-chuck-taylor-all-star",
+      price: 6000,
+      shortDescription: "Iconic canvas sneaker",
+      description: "The Converse Chuck Taylor All Star is the most iconic sneaker in the world, loved by everyone from rock stars to rebels.",
+      sku: "CONVERSE-CT-001",
+      status: "active",
+      stockQuantity: 100,
+      category: "casual", 
+      brand: "converse"
+    },
+    {
+      name: "Vans Old Skool",
+      slug: "vans-old-skool",
+      price: 7000,
+      shortDescription: "Classic skate shoe",
+      description: "The Vans Old Skool is the first Vans shoe to feature the iconic side stripe, making it a timeless classic.",
+      sku: "VANS-OS-001",
+      status: "active",
+      stockQuantity: 60,
+      category: "casual",
+      brand: "vans"
+    }
+  ]
+};
+
+// Save sample data to JSON file
+const dataPath = path.join(__dirname, '..', 'data', 'sample-data.json');
+fs.writeFileSync(dataPath, JSON.stringify(sampleData, null, 2));
+
+console.log('Sample data created at:', dataPath);
+console.log('Data structure:');
+console.log('- Categories: Shoes (main) -> Running, Sneaker, Casual (subcategories)');
+console.log('- Brands: Nike, Adidas, Converse, Vans');
+console.log('- Products: 5 sample products with proper category and brand relationships');
+console.log('\nNext steps:');
+console.log('1. Start Strapi server');
+console.log('2. Go to admin panel');
+console.log('3. Create categories, brands, and products using this data');
