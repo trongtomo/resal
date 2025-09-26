@@ -11,6 +11,62 @@ import Breadcrumb from './Breadcrumb'
 import Pagination from './Pagination'
 import ProductFilters from './ProductFilters'
 
+// Helper function to apply filters to products
+const applyFilters = (products, filterParams) => {
+  let filteredProducts = [...products]
+  
+  // Apply brand filter
+  if (filterParams.brand) {
+    filteredProducts = filteredProducts.filter(product => 
+      product.brand?.documentId === filterParams.brand
+    )
+  }
+  
+  // Apply price filters
+  if (filterParams.priceMin) {
+    filteredProducts = filteredProducts.filter(product => 
+      product.price >= parseInt(filterParams.priceMin)
+    )
+  }
+  
+  if (filterParams.priceMax) {
+    filteredProducts = filteredProducts.filter(product => 
+      product.price <= parseInt(filterParams.priceMax)
+    )
+  }
+  
+  // Apply price range filters
+  if (filterParams.priceRange && filterParams.priceRange !== 'all') {
+    switch (filterParams.priceRange) {
+      case 'under-50':
+        filteredProducts = filteredProducts.filter(product => product.price < 5000000)
+        break
+      case '50-100':
+        filteredProducts = filteredProducts.filter(product => 
+          product.price >= 5000000 && product.price <= 10000000
+        )
+        break
+      case '100-200':
+        filteredProducts = filteredProducts.filter(product => 
+          product.price >= 10000000 && product.price <= 20000000
+        )
+        break
+      case 'above-200':
+        filteredProducts = filteredProducts.filter(product => product.price > 20000000)
+        break
+    }
+  }
+  
+  // Apply sorting
+  if (filterParams.sortBy === 'price-asc') {
+    filteredProducts.sort((a, b) => a.price - b.price)
+  } else if (filterParams.sortBy === 'price-desc') {
+    filteredProducts.sort((a, b) => b.price - a.price)
+  }
+  
+  return filteredProducts
+}
+
 export default function ProductsPageClient({ initialProducts = [], initialPagination = { page: 1, pageCount: 1, total: 0 }, initialCategory = null }) {
   const searchParams = useSearchParams()
   const [products, setProducts] = useState(initialProducts)
@@ -29,6 +85,12 @@ export default function ProductsPageClient({ initialProducts = [], initialPagina
   useEffect(() => {
     const fetchData = async () => {
       const categorySlug = searchParams.get('category')
+      const brandSlug = searchParams.get('brand')
+      const priceMin = searchParams.get('priceMin')
+      const priceMax = searchParams.get('priceMax')
+      const priceRange = searchParams.get('priceRange')
+      const sortBy = searchParams.get('sortBy')
+      
       setLoading(true)
       
       try {
@@ -38,17 +100,67 @@ export default function ProductsPageClient({ initialProducts = [], initialPagina
           const foundCategory = categoriesData.categories?.find(cat => cat.slug === categorySlug)
           setCategory(foundCategory)
           
-          // Fetch products for this category
-          const productsData = await api.getProductsByCategory(categorySlug)
-          setProducts(productsData.products || [])
-          setPagination({ page: 1, pageCount: 1, total: productsData.products?.length || 0 })
+          // Check if this is a parent category (has children)
+          if (foundCategory?.children && foundCategory.children.length > 0) {
+            // Fetch products from all subcategories
+            const productsData = await api.getProductsByParentCategory(categorySlug)
+            let filteredProducts = productsData.products || []
+            
+            // Apply filters from URL parameters
+            filteredProducts = applyFilters(filteredProducts, {
+              brand: brandSlug,
+              priceMin,
+              priceMax,
+              priceRange,
+              sortBy
+            })
+            
+            setProducts(filteredProducts)
+            setPagination({ page: 1, pageCount: 1, total: filteredProducts.length })
+          } else {
+            // Fetch products for this specific category
+            const productsData = await api.getProductsByCategory(categorySlug)
+            let filteredProducts = productsData.products || []
+            
+            // Apply filters from URL parameters
+            filteredProducts = applyFilters(filteredProducts, {
+              brand: brandSlug,
+              priceMin,
+              priceMax,
+              priceRange,
+              sortBy
+            })
+            
+            setProducts(filteredProducts)
+            setPagination({ page: 1, pageCount: 1, total: filteredProducts.length })
+          }
         } else {
           // No category - show all products
           setCategory(null)
           const productsData = await api.getAllProducts()
-          setProducts(productsData.products || [])
-          setPagination({ page: 1, pageCount: 1, total: productsData.products?.length || 0 })
+          let filteredProducts = productsData.products || []
+          
+          // Apply filters from URL parameters
+          filteredProducts = applyFilters(filteredProducts, {
+            brand: brandSlug,
+            priceMin,
+            priceMax,
+            priceRange,
+            sortBy
+          })
+          
+          setProducts(filteredProducts)
+          setPagination({ page: 1, pageCount: 1, total: filteredProducts.length })
         }
+        
+        // Update filters state from URL parameters
+        setFilters({
+          priceMin: priceMin || '',
+          priceMax: priceMax || '',
+          priceRange: priceRange || 'all',
+          sortBy: sortBy || 'newest',
+          selectedBrand: brandSlug || null
+        })
       } catch (error) {
         console.error('Error fetching data:', error)
       } finally {
@@ -81,16 +193,34 @@ export default function ProductsPageClient({ initialProducts = [], initialPagina
       const newUrl = `/products?${queryParams.toString()}`
       window.history.pushState({}, '', newUrl)
 
-      // Fetch filtered products using simple API
+      // Fetch products based on category and apply filters
       let data
       if (categorySlug) {
-        data = await api.getProductsByCategory(categorySlug)
+        const categoriesData = await api.getAllCategories()
+        const foundCategory = categoriesData.categories?.find(cat => cat.slug === categorySlug)
+        
+        if (foundCategory?.children && foundCategory.children.length > 0) {
+          data = await api.getProductsByParentCategory(categorySlug)
+        } else {
+          data = await api.getProductsByCategory(categorySlug)
+        }
       } else {
         data = await api.getAllProducts()
       }
       
-      setProducts(data.products || [])
-      setPagination({ page: 1, pageCount: 1, total: data.products?.length || 0 })
+      let filteredProducts = data.products || []
+      
+      // Apply filters using the helper function
+      filteredProducts = applyFilters(filteredProducts, {
+        brand: newFilters.selectedBrand,
+        priceMin: newFilters.priceMin,
+        priceMax: newFilters.priceMax,
+        priceRange: newFilters.priceRange,
+        sortBy: newFilters.sortBy
+      })
+      
+      setProducts(filteredProducts)
+      setPagination({ page: 1, pageCount: 1, total: filteredProducts.length })
     } catch (error) {
       console.error('Error fetching filtered products:', error)
     } finally {

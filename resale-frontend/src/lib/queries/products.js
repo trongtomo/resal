@@ -27,6 +27,31 @@ export const GET_PRODUCTS_BY_CATEGORY = `
   }
 `
 
+export const GET_PRODUCTS_BY_PARENT_CATEGORY = `
+  query GetProductsByParentCategory($parentCategorySlug: String!) {
+    products(filters: { category: { parent: { slug: { eq: $parentCategorySlug } } } }) {
+      documentId
+      name
+      slug
+      price
+      shortDescription
+      images {
+        url
+      }
+      category {
+        documentId
+        name
+        slug
+      }
+      brand {
+        documentId
+        name
+        slug
+      }
+    }
+  }
+`
+
 export const GET_ALL_PRODUCTS = `
   query GetAllProducts {
     products {
