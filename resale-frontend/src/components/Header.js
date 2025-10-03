@@ -1,13 +1,16 @@
 'use client'
 
+import { useAuth } from '@/contexts/AuthContext'
 import { api } from '@/lib/simple-api'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import Cart from './Cart'
 import CartIcon from './CartIcon'
 import CategoryDropdown from './CategoryDropdown'
+import LoginModal from './LoginModal'
 import MobileNavigation from './MobileNavigation'
 import SearchBar from './SearchBar'
+import UserMenu from './UserMenu'
 
 export default function Header() {
   const [activeDropdown, setActiveDropdown] = useState(null)
@@ -15,6 +18,8 @@ export default function Header() {
   const [loading, setLoading] = useState(true)
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
+  const { isAuthenticated } = useAuth()
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -98,8 +103,19 @@ export default function Header() {
             </Link>
           </nav>
 
-          {/* Cart and Mobile Menu */}
+          {/* Auth, Cart and Mobile Menu */}
           <div className="flex items-center space-x-4">
+            {isAuthenticated ? (
+              <UserMenu />
+            ) : (
+              <button
+                onClick={() => setIsLoginModalOpen(true)}
+                className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                Sign In
+              </button>
+            )}
+            
             <CartIcon onClick={handleCartToggle} />
             
             <div className="md:hidden">
@@ -126,6 +142,9 @@ export default function Header() {
       
       {/* Mobile Navigation */}
       <MobileNavigation isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
+      
+      {/* Login Modal */}
+      <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
     </header>
   )
 }
