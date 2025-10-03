@@ -1,5 +1,6 @@
 'use client'
 
+import { useAuth } from '@/contexts/AuthContext'
 import { createContext, useContext, useEffect, useReducer } from 'react'
 
 const CartContext = createContext()
@@ -57,13 +58,15 @@ const cartReducer = (state, action) => {
 }
 
 export function CartProvider({ children }) {
+  const { user, isAuthenticated } = useAuth()
   const [state, dispatch] = useReducer(cartReducer, {
     items: []
   })
 
   // Load cart from localStorage on mount
   useEffect(() => {
-    const savedCart = localStorage.getItem('cart')
+    const cartKey = isAuthenticated && user ? `cart_${user.id}` : 'cart'
+    const savedCart = localStorage.getItem(cartKey)
     if (savedCart) {
       try {
         const cartData = JSON.parse(savedCart)
@@ -72,12 +75,13 @@ export function CartProvider({ children }) {
         console.error('Error loading cart from localStorage:', error)
       }
     }
-  }, [])
+  }, [isAuthenticated, user])
 
   // Save cart to localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(state.items))
-  }, [state.items])
+    const cartKey = isAuthenticated && user ? `cart_${user.id}` : 'cart'
+    localStorage.setItem(cartKey, JSON.stringify(state.items))
+  }, [state.items, isAuthenticated, user])
 
   const addToCart = (product) => {
     dispatch({ type: 'ADD_TO_CART', product })
